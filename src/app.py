@@ -19,7 +19,8 @@ if sys.stdout.encoding != 'utf-8':
         pass
 
 # Import các thành phần từ file của Role 2, Role 3 & Multi-Provider Adapter
-from tools import AVAILABLE_TOOLS, get_weather, search_flights
+# from tools import AVAILABLE_TOOLS, get_weather, search_flights
+from ai_levels.level3_reactive_agent import get_weather, search_flights
 from prompts import CHATBOT_BASELINE_PROMPT, REACT_SYSTEM_PROMPT, MAX_ITERATIONS
 from providers import get_llm_provider
 
@@ -49,6 +50,14 @@ def run_baseline_chatbot(user_query: str, provider):
     response = provider.generate(user_query, system_prompt=CHATBOT_BASELINE_PROMPT)
     print(f"🤖 Chatbot trả lời:\n{response}")
 
+def run_baseline_test_cases(test_cases, provider, limit=5):
+    """Chạy Chatbot baseline trên 5 test case đầu tiên."""
+    print(f"\n--- DEMO 1: CHẠY TRÊN {min(limit, len(test_cases))} TEST CASES CHATBOT BASELINE ---")
+    for idx, test_case in enumerate(test_cases[:limit], start=1):
+        print(f"\n=== Test case {idx}/{min(limit, len(test_cases))} ===")
+        print(f"📌 Câu hỏi: {test_case['question']}")
+        print(f"🧾 Category: {test_case.get('category', 'N/A')}")
+        run_baseline_chatbot(test_case["question"], provider)
 
 def run_react_agent(user_query: str, provider):
     """
@@ -90,12 +99,15 @@ if __name__ == "__main__":
     
     tests = load_test_cases()
     print(f"✅ Đã tải thành công {len(tests)} Test Cases từ config/test_cases.json\n")
-    
-    # Chạy thử câu test số 3
+
+    # Chạy 5 câu test baseline
+    run_baseline_test_cases(tests, provider, limit=5)
+
+    # Chạy vòng lặp ReAct Agent với câu test số 3
     sample_query = tests[2]["question"]
     
-    print("--- DEMO 1: CHẠY TRÊN CHATBOT BASELINE ---")
-    run_baseline_chatbot(sample_query, provider)
+    # print("--- DEMO 1: CHẠY TRÊN CHATBOT BASELINE ---")
+    # run_baseline_chatbot(sample_query, provider)
     
     print("\n--- DEMO 2: CHẠY TRÊN REACT AGENT ---")
     run_react_agent(sample_query, provider)
