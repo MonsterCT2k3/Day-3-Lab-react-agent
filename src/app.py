@@ -103,7 +103,7 @@ def execute_tool(tool_name: str, params: list):
         return f"❌ Error khi thực thi {tool_name}: {str(e)}"
 
 
-def run_baseline_test_cases(test_cases, provider, limit=5):
+def run_baseline_test_cases(test_cases, provider, limit=10):
     """Chạy Chatbot baseline trên test case đầu tiên."""
     print(f"\n--- DEMO 1: CHẠY TRÊN {min(limit, len(test_cases))} TEST CASES CHATBOT BASELINE ---")
     for idx, test_case in enumerate(test_cases[:limit], start=1):
