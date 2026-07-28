@@ -14,8 +14,13 @@ Nguyên tắc bắt buộc (theo docs/CODELAB.md):
 
 from datetime import datetime, timedelta
 import random
+import sys
+import os
 
-from src.mock_db import *
+# Thêm thư mục src vào path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from mock_db import *
 
 
 # ============================================================
@@ -40,6 +45,22 @@ def search_listings(location: str = "", price_max: int = None,
         search_listings(location="Cầu Giấy", price_max=7000000)
     """
     try:
+        if price_max is not None and str(price_max).strip() != "" and str(price_max).lower() != "none":
+            try:
+                price_max = int(price_max)
+            except ValueError:
+                price_max = None
+        else:
+            price_max = None
+
+        if bedrooms is not None and str(bedrooms).strip() != "" and str(bedrooms).lower() != "none":
+            try:
+                bedrooms = int(bedrooms)
+            except ValueError:
+                bedrooms = None
+        else:
+            bedrooms = None
+
         results = []
         for item in LISTINGS_DB.values():
             if location and location.lower() not in item["location"].lower():
