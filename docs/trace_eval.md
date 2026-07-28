@@ -26,4 +26,18 @@
 * **Nhận xét**: Chatbot trả lời rất thân thiện và lịch sự nhưng không thể giải quyết nhu cầu thực tế do **thiếu khả năng kết nối dữ liệu nhà trọ thời gian thực (Grounding)**.
 
 ### 🧠 ReAct Agent (Mốc 3):
-*(Chưa cập nhật - Sẽ hoàn thiện ở Mốc 3)*
+* **Thought 1**: Người dùng muốn tìm phòng trọ ở Hà Nội với ngân sách dưới 3 triệu đồng/tháng. Tôi cần sử dụng công cụ `search_listings` để tìm kiếm các tin đăng phù hợp.
+* **Action 1**: `search_listings("Hà Nội", 3000000, "phong_tro", None)`
+* **Observation 1**: `Tìm thấy 1 kết quả: - [PT004] Phòng trọ sinh viên gần Học viện Ngân Hàng | Giá: 2,500,000 VNĐ/tháng | Khu vực: Đức Thắng, Bắc Từ Liêm, Hà Nội | 1 PN`
+* **Thought 2**: Tôi đã tìm thấy một phòng trọ phù hợp với tiêu chí của người dùng. Tôi sẽ cung cấp thông tin này như một câu trả lời cuối cùng.
+* **Final Answer**: *"Có, tôi tìm thấy một phòng trọ phù hợp với tiêu chí của bạn: - [PT004] Phòng trọ sinh viên gần Học viện Ngân Hàng | Giá: 2,500,000 VNĐ/tháng | Khu vực: Đức Thắng, Bắc Từ Liêm, Hà Nội | 1 PN. Bạn có muốn tìm hiểu thêm về phòng này không?"*
+* **Nhận xét**: Agent hoàn thành xuất sắc nhiệm vụ trong 2 bước lặp, gọi công cụ tra cứu chính xác phòng trọ [PT004] thỏa mãn điều kiện ngân sách < 3 triệu đồng.
+
+---
+
+## 🛡️ 3. ĐÁNH GIÁ PHANH AN TOÀN (GUARDRAILS & SAFEGUARDS)
+
+* **Cấu hình Guardrail**: `MAX_ITERATIONS = 3`, `TIMEOUT_SECONDS = 10`
+* **Đánh giá kiểm thử Edge Cases (Test Case #8, #9, #10)**:
+  * Khi gọi Tool với tham số sai hoặc mã không tồn tại (VD: mã `XX999`), Tool trả về thông báo lỗi Observation mà không gây crash chương trình (`src/tools.py`).
+  * Phanh `MAX_ITERATIONS` kích hoạt ngắt lặp an toàn ngay sau 3 vòng lặp `Thought -> Action`, bảo vệ ứng dụng khỏi vòng lặp vô tận và tiết kiệm tài nguyên API.
