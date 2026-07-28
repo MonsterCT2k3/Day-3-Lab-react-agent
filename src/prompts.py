@@ -73,6 +73,7 @@ def booking_appointment_guardrail(listing_id, date, time, customer_name, custome
         return False
     
     available_times = check_viewing_availability(listing_id, date)
-
+    if time not in available_times:
+        return False
     
     return True
