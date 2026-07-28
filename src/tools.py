@@ -14,8 +14,13 @@ Nguyên tắc bắt buộc (theo docs/CODELAB.md):
 
 from datetime import datetime, timedelta
 import random
+import sys
+import os
 
-from src.mock_db import *
+# Thêm thư mục src vào path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from mock_db import *
 
 
 # ============================================================
