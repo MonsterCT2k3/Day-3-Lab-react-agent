@@ -55,7 +55,7 @@ BẮT ĐẦU:
 """
 
 # 🛡️ GUARDRAILS CONFIGURATION (PHANH AN TOÀN)
-MAX_ITERATIONS = 3  # Giới hạn tối đa 3 vòng lặp Thought-Action để tránh lặp vô tận
+MAX_ITERATIONS = 10  # Giới hạn tối đa 10 vòng lặp Thought-Action để tránh lặp vô tận
 TIMEOUT_SECONDS = 10  # Timeout cho mỗi lần gọi tool
 
 def booking_appointment_guardrail(listing_id, date, time, customer_name, customer_phone):
