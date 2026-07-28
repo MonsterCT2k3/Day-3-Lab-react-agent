@@ -1,35 +1,44 @@
-flowchart TD
-    A["👤 User Query"] --> B{"🧠 Phân Luồng Câu Hỏi (Router)"}
-    
-    %% Đường đi Chatbot Path (Câu hỏi đơn giản / Lý thuyết)
-    B -- "Câu hỏi đơn giản / Lý thuyết\n(VD: Kinh nghiệm thuê nhà, giấy tờ hợp đồng)" --> C["🤖 Chatbot Baseline Path\n(CHATBOT_BASELINE_PROMPT)"]
-    C --> D["💬 Trả lời trực tiếp từ kiến thức LLM"]
-    D --> END["🏁 Kết thúc & Phản hồi người dùng"]
+graph TD
+    A["User Query Received"] --> B{"Does query require<br/>real-time data or<br/>external tools?"}
 
-    %% Đường đi ReAct Agent Path (Câu hỏi phức tạp / Cần công cụ)
-    B -- "Câu hỏi cần tra cứu / Đặt lịch\n(VD: Tìm phòng Cầu Giấy dưới 3tr, đặt lịch xem nhà)" --> E["🧠 ReAct Agent Path\n(run_react_agent loop)"]
-    
-    subgraph ReAct_Loop ["🔄 Vòng Lặp Suy Luận ReAct Loop (Tối đa MAX_ITERATIONS = 3)"]
-        E --> F["🧠 Thought: Phân tích nhu cầu & lựa chọn công cụ"]
-        F --> G{"🛠️ Chọn Action / Tool"}
-        
-        G -- "Tìm kiếm phòng trọ" --> T1["search_listings(location, price_max...)"]
-        G -- "Xem chi tiết tin đăng" --> T2["get_listing_detail(listing_id)"]
-        G -- "Kiểm tra giờ trống" --> T3["check_viewing_availability(listing_id, date)"]
-        G -- "Xác nhận đặt lịch xem nhà" --> T4["book_viewing_appointment(listing_id, date, time...)"]
-        G -- "Các tools khác (so sánh, khoảng cách...)" --> T5["compare_listings / calculate_distance..."]
-        
-        T1 --> O["👁️ Observation: Kết quả thực tế từ Mock DB (src/tools.py)"]
-        T2 --> O
-        T3 --> O
-        T4 --> O
-        T5 --> O
-        
-        O --> H{"🛡️ Kiểm tra Phanh Guardrail"}
-        H -- "Đã đủ thông tin trả lời" --> I["🏁 Final Answer: Đưa ra câu trả lời kèm bằng chứng thực tế"]
-        H -- "Chưa đủ thông tin & Step < 3" --> F
-        H -- "Vượt quá MAX_ITERATIONS = 3 / Lỗi bẫy Edge Case" --> J["🛡️ Guardrail Triggered: Ngắt lặp an toàn & Trả lời lịch sự"]
-    end
+    B -->|No| C["Knowledge-based<br/>Question?"]
+    C -->|Yes| D["ROUTE: CHATBOT BASELINE"]
+    C -->|No| E{"Can be answered<br/>from general<br/>knowledge?"}
+    E -->|Yes| D
+    E -->|No| F["ROUTE: REACT AGENT"]
 
-    I --> END
-    J --> END
+    B -->|Yes| G{"Single tool<br/>call or<br/>multiple?"}
+    G -->|Single| H["Simple lookup<br/>required?"]
+    H -->|Yes| I["ROUTE: CHATBOT BASELINE<br/>(with limited tool call)"]
+    H -->|No| F
+
+    G -->|Multiple| J{"Requires<br/>reasoning between<br/>steps?"}
+    J -->|Yes| F
+    J -->|No| I
+
+    D --> K["ChatBot Process"]
+    K --> L["Load System Prompt<br/>(Knowledge-only)"]
+    L --> M["Call LLM<br/>without tool context"]
+    M --> N["Return Natural Answer"]
+
+    F --> O["ReAct Agent Process"]
+    O --> P["Initialize ReAct Loop"]
+    P --> Q["Step N: Generate<br/>Thought + Action"]
+    Q --> R{"Has Final<br/>Answer?"}
+    R -->|Yes| S["Extract & Return<br/>Final Answer"]
+    R -->|No| T{"Valid Action?"}
+    T -->|No| U["Guardrail: Regenerate<br/>or Stop"]
+    T -->|Yes| V["Execute Tool"]
+    V --> W["Get Observation"]
+    W --> X{"Max Iterations<br/>reached?"}
+    X -->|Yes| Y["Guardrail: Stop<br/>& Return Best Answer"]
+    X -->|No| Q
+
+    I --> Z["Limited Tool Mode"]
+    Z --> AA["Chatbot with<br/>single tool access"]
+    AA --> N
+
+    U --> Q
+    Y --> N
+    S --> N
+    N --> AB["Output to User"]
