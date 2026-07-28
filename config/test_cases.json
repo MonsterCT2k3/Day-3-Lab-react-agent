@@ -2,31 +2,61 @@
   {
     "id": 1,
     "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Thủ đô của Việt Nam là gì?",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "question": "Những yếu tố quan trọng cần xem xét khi chọn nhà trọ/căn hộ là gì?",
+    "expected_behavior": "Chatbot trả lời từ kiến thức có sẵn: vị trí, giá cả, tiện ích, an ninh, quy mô diện tích, v.v."
   },
   {
     "id": 2,
     "category": "🟢 Đơn giản (Chỉ cần LLM)",
-    "question": "Nêu 3 lời khuyên để học tốt lập trình.",
-    "expected_behavior": "Chatbot trả lời trực tiếp từ kiến thức có sẵn."
+    "question": "Nêu 5 điều cần kiểm tra và hỏi chủ nhà trước khi ký hợp đồng thuê nhà.",
+    "expected_behavior": "Chatbot trả lời lời khuyên pháp lý/thực tế từ kiến thức có sẵn."
   },
   {
     "id": 3,
-    "category": "🟡 Multi-step (Cần Tool)",
-    "question": "Thời tiết ở Hà Nội hôm nay thế nào và tôi nên mặc gì đi chơi?",
-    "expected_behavior": "Agent gọi tool get_weather('Hà Nội') rồi suy luận trang phục."
+    "category": "🟡 Multi-step (Cần 1 Tool)",
+    "question": "Tôi đang tìm phòng trọ ở Hà Nội, ngân sách dưới 3 triệu đồng/tháng. Bạn có gợi ý gì không?",
+    "expected_behavior": "Agent gọi search_listings(location='Hà Nội', price_max=3000000) rồi trả về danh sách phòng trọ phù hợp."
   },
   {
     "id": 4,
-    "category": "🟡 Multi-step (Cần gọi 2 Tools)",
-    "question": "Kiểm tra vé máy bay từ TP.HCM đi Hà Nội ngày mai và dự báo thời tiết ở Hà Nội.",
-    "expected_behavior": "Agent gọi tool search_flights và get_weather để trả lời đầy đủ."
+    "category": "🟡 Multi-step (Cần 2 Tools)",
+    "question": "Tôi muốn xem chi tiết tin PT001, sau đó kiểm tra khung giờ xem nhà vào ngày 2026-08-15.",
+    "expected_behavior": "Agent: 1) get_listing_detail('PT001'), 2) check_viewing_availability('PT001', '2026-08-15') → trả về thông tin chi tiết + khung giờ trống."
   },
   {
     "id": 5,
-    "category": "🔴 Edge Case (Bẫy Guardrail)",
-    "question": "Tra cứu thời tiết ở thành phố Atlantis ngày 32/13/2026.",
-    "expected_behavior": "Tool báo lỗi tham số/thất bại, Guardrail ngắt sau 3 bước và trả về thông báo lịch sự."
+    "category": "🟡 Multi-step (Cần 3+ Tools)",
+    "question": "Tôi muốn đặt lịch xem phòng trọ PT001 vào ngày 2026-08-15 lúc 09:00. Tên tôi là Nguyễn Văn A, số điện thoại 0909123456.",
+    "expected_behavior": "Agent: 1) check_viewing_availability('PT001', '2026-08-15'), 2) book_viewing_appointment('PT001', '2026-08-15', '09:00', 'Nguyễn Văn A', '0909123456') → xác nhận mã lịch hẹn (APT1001, etc)."
+  },
+  {
+    "id": 6,
+    "category": "🟡 Multi-step (So sánh & Khoảng cách)",
+    "question": "So sánh 3 tin đăng PT001, CC002, CH003 theo giá và diện tích, rồi tính khoảng cách từ PT001 tới đại học bách khoa.",
+    "expected_behavior": "Agent: 1) compare_listings(['PT001', 'CC002', 'CH003']), 2) calculate_distance('PT001', 'đại học bách khoa') → bảng so sánh + khoảng cách."
+  },
+  {
+    "id": 7,
+    "category": "🟡 Multi-step (Thông tin khu vực + Liên hệ)",
+    "question": "Cho tôi biết thông tin khu vực xung quanh CH003 và liên hệ chủ nhà của tin đó.",
+    "expected_behavior": "Agent: 1) get_neighborhood_info('CH003'), 2) get_landlord_contact('CH003') → mô tả khu vực + số điện thoại chủ nhà."
+  },
+  {
+    "id": 8,
+    "category": "🔴 Edge Case (Mã tin đăng không tồn tại)",
+    "question": "Cho tôi chi tiết của tin đăng XX999 và đặt lịch xem nó vào 2026-08-20 lúc 14:00.",
+    "expected_behavior": "Agent gọi get_listing_detail('XX999') → nhận lỗi 'Không tìm thấy tin đăng XX999', trả về thông báo lịch sự thay vì crash. Guardrail ngắt sau 2-3 bước."
+  },
+  {
+    "id": 9,
+    "category": "🔴 Edge Case (Giờ không hợp lệ)",
+    "question": "Đặt lịch xem PT001 vào 2026-08-15 lúc 23:00 với tên 'Trần Thị B', SĐT '0911999888'.",
+    "expected_behavior": "Agent gọi book_viewing_appointment với giờ không nằm trong AVAILABLE_SLOTS → nhận lỗi 'Khung giờ không hợp lệ' → trả về thông báo rõ ràng, không lặp."
+  },
+  {
+    "id": 10,
+    "category": "🔴 Edge Case (Yêu cầu vô lý)",
+    "question": "Tôi muốn tìm căn hộ 5 phòng ngủ ở Hà Nội, giá dưới 1 triệu đồng/tháng.",
+    "expected_behavior": "Agent gọi search_listings(...) → không tìm thấy → nhận lỗi 'Không tìm thấy tin đăng nào phù hợp', giải thích và gợi ý nới lỏng tiêu chí (tăng giá hoặc giảm số phòng)."
   }
 ]
