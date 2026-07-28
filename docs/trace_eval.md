@@ -1,6 +1,7 @@
 # 📊 BÁO CÁO GIÁM SÁT & ĐÁNH GIÁ (OBSERVABILITY TRACE LOGS)
 *Dành cho Role 5: Observability & Reviewer*
 *Chủ đề bài toán: Đề tài 10 - Trợ Lý Tìm & Đặt Lịch Xem Nhà Trọ / Căn Hộ Cho Thuê*
+*Trạng thái: ✅ Đã hoàn thành Mốc 1 (Scoring Matrix & Định hình)*
 
 ---
 
